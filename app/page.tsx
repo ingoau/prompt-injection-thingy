@@ -49,7 +49,7 @@ export default function Home() {
       <Card className="w-full">
         <CardHeader>
           <CardTitle>Chat</CardTitle>
-          <CardDescription>Simple Vercel AI SDK + OpenAI chat</CardDescription>
+          <CardDescription>Simple Vercel AI SDK + OpenRouter chat</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <ScrollArea className="h-[60vh] rounded-md border">

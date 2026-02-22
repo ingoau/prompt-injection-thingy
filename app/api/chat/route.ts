@@ -1,13 +1,13 @@
-import { openai } from "@ai-sdk/openai";
+import { openrouter } from "@openrouter/ai-sdk-provider";
 import { convertToModelMessages, streamText, UIMessage } from "ai";
 import { NextResponse } from "next/server";
 
-const DEFAULT_MODEL = "gpt-4o-mini";
+const DEFAULT_MODEL = "openai/gpt-4o-mini";
 
 export async function POST(request: Request) {
-  if (!process.env.OPENAI_API_KEY) {
+  if (!process.env.OPENROUTER_API_KEY) {
     return NextResponse.json(
-      { error: "Missing OPENAI_API_KEY environment variable." },
+      { error: "Missing OPENROUTER_API_KEY environment variable." },
       { status: 500 },
     );
   }
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     );
 
     const result = streamText({
-      model: openai(process.env.OPENAI_MODEL ?? DEFAULT_MODEL),
+      model: openrouter(process.env.OPENROUTER_MODEL ?? DEFAULT_MODEL),
       messages: modelMessages,
     });
 

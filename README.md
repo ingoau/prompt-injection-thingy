@@ -3,7 +3,7 @@
 This project is a Next.js App Router chat interface that uses:
 
 - `useChat` from `@ai-sdk/react`
-- OpenAI via `@ai-sdk/openai`
+- OpenRouter via `@openrouter/ai-sdk-provider`
 - shadcn/ui components added through the shadcn CLI
 
 ## Setup
@@ -20,8 +20,8 @@ bun install
 cp .env.example .env.local
 ```
 
-Set `OPENAI_API_KEY` in `.env.local`.  
-Optional: override `OPENAI_MODEL` (default: `gpt-4o-mini`).
+Set `OPENROUTER_API_KEY` in `.env.local`.  
+Optional: override `OPENROUTER_MODEL` (default: `openai/gpt-4o-mini`).
 
 ## Run
 
@@ -34,7 +34,7 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Architecture
 
 - Client UI: `/app/page.tsx`
-  - Uses `useChat({ api: "/api/chat" })`
+  - Uses `useChat` with `DefaultChatTransport({ api: "/api/chat" })`
   - Renders messages, input, loading/error states
 - API route: `/app/api/chat/route.ts`
   - Accepts `POST` chat requests from `useChat`
