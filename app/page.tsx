@@ -3,6 +3,8 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, UIMessage } from "ai";
 import { FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -12,6 +14,28 @@ function getMessageText(message: UIMessage) {
     .filter((part) => part.type === "text")
     .map((part) => part.text)
     .join("");
+}
+
+function MessageMarkdown({ text }: { text: string }) {
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        p: ({ children }) => <p className="whitespace-pre-wrap break-words">{children}</p>,
+        a: ({ children, href }) => (
+          <a
+            href={href}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {children}
+          </a>
+        ),
+      }}
+    >
+      {text}
+    </ReactMarkdown>
+  );
 }
 
 export default function Home() {
@@ -76,14 +100,22 @@ export default function Home() {
                   className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
+                    className={`max-w-[85%] rounded-lg px-3 py-2 ${
                       message.role === "user"
                         ? "bg-primary text-primary-foreground"
                         : "bg-muted text-foreground"
                     }`}
                   >
                     {text ? (
-                      <span className="whitespace-pre-wrap break-words">{text}</span>
+                      <div
+                        className={
+                          message.role === "user"
+                            ? "prose prose-sm max-w-none prose-invert prose-headings:scroll-m-20 prose-headings:tracking-tight prose-h1:text-3xl prose-h1:font-extrabold prose-h2:border-b prose-h2:pb-2 prose-h2:text-2xl prose-h2:font-semibold prose-h3:text-xl prose-h3:font-semibold prose-p:leading-7 prose-a:text-primary-foreground prose-a:underline prose-a:underline-offset-2 prose-strong:text-primary-foreground prose-code:text-primary-foreground prose-code:before:content-none prose-code:after:content-none prose-code:bg-primary-foreground/20 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-primary-foreground/15 prose-pre:text-primary-foreground prose-pre:overflow-x-auto prose-blockquote:border-primary-foreground/40 prose-blockquote:text-primary-foreground/90"
+                            : "prose prose-sm max-w-none dark:prose-invert prose-headings:scroll-m-20 prose-headings:tracking-tight prose-h1:text-3xl prose-h1:font-extrabold prose-h2:border-b prose-h2:pb-2 prose-h2:text-2xl prose-h2:font-semibold prose-h3:text-xl prose-h3:font-semibold prose-p:leading-7 prose-a:underline prose-a:underline-offset-2 prose-code:before:content-none prose-code:after:content-none prose-code:bg-foreground/10 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-background/70 prose-pre:overflow-x-auto"
+                        }
+                      >
+                        <MessageMarkdown text={text} />
+                      </div>
                     ) : (
                       <span className="text-muted-foreground italic">
                         {isLoading && message.role === "assistant"
