@@ -43,7 +43,8 @@ function MessageMarkdown({ text }: { text: string }) {
 export default function Home() {
   const [input, setInput] = useState("");
   const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
-  const { messages, sendMessage, status, error } = useChat({
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const { messages, sendMessage, stop, status, error } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
   });
 
@@ -55,6 +56,10 @@ export default function Home() {
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, status]);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -135,21 +140,22 @@ export default function Home() {
           <form className="flex items-center gap-2" onSubmit={handleSubmit}>
             <InputGroup>
               <Input
+                ref={inputRef}
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
                 onKeyDown={handleInputKeyDown}
                 placeholder="Type a message..."
-                disabled={isLoading}
                 className="h-10 pr-24"
               />
               <InputGroupButton>
                 <Button
-                  type="submit"
+                  type={isLoading ? "button" : "submit"}
                   size="sm"
-                  disabled={isLoading || input.trim().length === 0}
+                  onClick={isLoading ? () => stop() : undefined}
+                  disabled={!isLoading && input.trim().length === 0}
                   className="pointer-events-auto"
                 >
-                  {isLoading ? "Sending..." : "Send"}
+                  {isLoading ? "Stop" : "Send"}
                 </Button>
               </InputGroupButton>
             </InputGroup>
