@@ -7,6 +7,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { InputGroup, InputGroupButton } from "@/components/ui/input-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 function getMessageText(message: UIMessage) {
@@ -66,7 +68,7 @@ export default function Home() {
     await sendMessage({ text: trimmed });
   };
 
-  const handleInputKeyDown = async (event: KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleInputKeyDown = async (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) {
       return;
     }
@@ -130,19 +132,27 @@ export default function Home() {
             <p className="text-destructive mb-2 text-sm">{error.message}</p>
           ) : null}
 
-          <form className="flex items-end gap-2" onSubmit={handleSubmit}>
-            <textarea
-              value={input}
-              onChange={(event) => setInput(event.target.value)}
-              onKeyDown={handleInputKeyDown}
-              placeholder="Type a message..."
-              disabled={isLoading}
-              rows={3}
-              className="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 min-h-9 max-h-48 flex-1 resize-y rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
-            />
-            <Button type="submit" disabled={isLoading || input.trim().length === 0}>
-              {isLoading ? "Sending..." : "Send"}
-            </Button>
+          <form className="flex items-center gap-2" onSubmit={handleSubmit}>
+            <InputGroup>
+              <Input
+                value={input}
+                onChange={(event) => setInput(event.target.value)}
+                onKeyDown={handleInputKeyDown}
+                placeholder="Type a message..."
+                disabled={isLoading}
+                className="h-10 pr-24"
+              />
+              <InputGroupButton>
+                <Button
+                  type="submit"
+                  size="sm"
+                  disabled={isLoading || input.trim().length === 0}
+                  className="pointer-events-auto"
+                >
+                  {isLoading ? "Sending..." : "Send"}
+                </Button>
+              </InputGroupButton>
+            </InputGroup>
           </form>
         </div>
       </div>
