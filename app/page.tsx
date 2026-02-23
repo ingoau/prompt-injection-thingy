@@ -2,10 +2,9 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, UIMessage } from "ai";
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 function getMessageText(message: UIMessage) {
@@ -43,6 +42,22 @@ export default function Home() {
     await sendMessage({ text: trimmed });
   };
 
+  const handleInputKeyDown = async (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) {
+      return;
+    }
+
+    event.preventDefault();
+    const trimmed = input.trim();
+
+    if (!trimmed || isLoading) {
+      return;
+    }
+
+    setInput("");
+    await sendMessage({ text: trimmed });
+  };
+
   return (
     <main className="relative flex h-screen flex-col bg-background">
       <ScrollArea className="min-h-0 flex-1 pb-36">
@@ -67,7 +82,9 @@ export default function Home() {
                         : "bg-muted text-foreground"
                     }`}
                   >
-                    {text || (
+                    {text ? (
+                      <span className="whitespace-pre-wrap break-words">{text}</span>
+                    ) : (
                       <span className="text-muted-foreground italic">
                         {isLoading && message.role === "assistant"
                           ? "Thinking..."
@@ -89,12 +106,15 @@ export default function Home() {
             <p className="text-destructive mb-2 text-sm">{error.message}</p>
           ) : null}
 
-          <form className="flex gap-2" onSubmit={handleSubmit}>
-            <Input
+          <form className="flex items-end gap-2" onSubmit={handleSubmit}>
+            <textarea
               value={input}
               onChange={(event) => setInput(event.target.value)}
+              onKeyDown={handleInputKeyDown}
               placeholder="Type a message..."
               disabled={isLoading}
+              rows={3}
+              className="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 min-h-9 max-h-48 flex-1 resize-y rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
             />
             <Button type="submit" disabled={isLoading || input.trim().length === 0}>
               {isLoading ? "Sending..." : "Send"}
