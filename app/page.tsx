@@ -3,7 +3,6 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, UIMessage } from "ai";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { Moon, Sun } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,18 +17,6 @@ function getMessageText(message: UIMessage) {
 
 export default function Home() {
   const [input, setInput] = useState("");
-  const [isDark, setIsDark] = useState<boolean>(() => {
-    if (typeof window === "undefined") {
-      return false;
-    }
-
-    const storedTheme = window.localStorage.getItem("theme");
-    if (storedTheme) {
-      return storedTheme === "dark";
-    }
-
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
-  });
   const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
   const { messages, sendMessage, status, error } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
@@ -43,15 +30,6 @@ export default function Home() {
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, status]);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", isDark);
-    window.localStorage.setItem("theme", isDark ? "dark" : "light");
-  }, [isDark]);
-
-  const toggleTheme = () => {
-    setIsDark((previous) => !previous);
-  };
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -67,18 +45,6 @@ export default function Home() {
 
   return (
     <main className="relative flex h-screen flex-col bg-background">
-      <div className="absolute top-4 right-4 z-10">
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          onClick={toggleTheme}
-          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-        >
-          {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
-        </Button>
-      </div>
-
       <ScrollArea className="min-h-0 flex-1 pb-36">
         <div className="mx-auto w-full max-w-3xl space-y-4 p-4 sm:p-6">
           {messages.length === 0 ? (
