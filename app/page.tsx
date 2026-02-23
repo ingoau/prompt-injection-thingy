@@ -93,27 +93,19 @@ export default function Home() {
           ) : (
             messages.map((message) => {
               const text = getMessageText(message);
+              const label = message.role === "user" ? "User" : "Agent";
 
               return (
                 <div
                   key={message.id}
-                  className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                  className="w-full"
                 >
-                  <div
-                    className={`max-w-[85%] rounded-lg px-3 py-2 ${
-                      message.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-foreground"
-                    }`}
-                  >
+                  <div className="space-y-1">
+                    <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                      {label}
+                    </p>
                     {text ? (
-                      <div
-                        className={
-                          message.role === "user"
-                            ? "prose prose-sm max-w-none prose-invert prose-headings:scroll-m-20 prose-headings:tracking-tight prose-h1:text-3xl prose-h1:font-extrabold prose-h2:border-b prose-h2:pb-2 prose-h2:text-2xl prose-h2:font-semibold prose-h3:text-xl prose-h3:font-semibold prose-p:leading-7 prose-a:text-primary-foreground prose-a:underline prose-a:underline-offset-2 prose-strong:text-primary-foreground prose-code:text-primary-foreground prose-code:before:content-none prose-code:after:content-none prose-code:bg-primary-foreground/20 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-primary-foreground/15 prose-pre:text-primary-foreground prose-pre:overflow-x-auto prose-blockquote:border-primary-foreground/40 prose-blockquote:text-primary-foreground/90"
-                            : "prose prose-sm max-w-none dark:prose-invert prose-headings:scroll-m-20 prose-headings:tracking-tight prose-h1:text-3xl prose-h1:font-extrabold prose-h2:border-b prose-h2:pb-2 prose-h2:text-2xl prose-h2:font-semibold prose-h3:text-xl prose-h3:font-semibold prose-p:leading-7 prose-a:underline prose-a:underline-offset-2 prose-code:before:content-none prose-code:after:content-none prose-code:bg-foreground/10 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-background/70 prose-pre:overflow-x-auto"
-                        }
-                      >
+                      <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:scroll-m-20 prose-headings:tracking-tight prose-h1:text-3xl prose-h1:font-extrabold prose-h2:border-b prose-h2:pb-2 prose-h2:text-2xl prose-h2:font-semibold prose-h3:text-xl prose-h3:font-semibold prose-p:leading-7 prose-a:underline prose-a:underline-offset-2 prose-code:before:content-none prose-code:after:content-none prose-code:bg-foreground/10 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-background/70 prose-pre:overflow-x-auto">
                         <MessageMarkdown text={text} />
                       </div>
                     ) : (
