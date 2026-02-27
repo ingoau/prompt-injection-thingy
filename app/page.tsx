@@ -91,7 +91,7 @@ export default function Home() {
     [currentLevelIndex],
   );
   const levelProgressText = useMemo(
-    () => `Level ${currentLevelIndex + 1} of ${CHALLENGE_LEVELS.length}`,
+    () => `${currentLevelIndex + 1}/${CHALLENGE_LEVELS.length}`,
     [currentLevelIndex],
   );
   const progressPercent = useMemo(
@@ -191,8 +191,10 @@ export default function Home() {
       <ScrollArea className="min-h-0 flex-1">
         <div className="mx-auto w-full max-w-3xl space-y-4 p-4 sm:p-6 pb-24!">
           <section className="w-full border border-primary/45 bg-primary/5 p-4">
-            <p className="text-primary text-xs tracking-[0.2em] uppercase">{levelProgressText}</p>
-            <p className="text-primary mt-2 text-base font-semibold">{currentLevel.name}</p>
+            <div className="flex items-start justify-between gap-4">
+              <p className="text-primary text-base font-semibold">{currentLevel.name}</p>
+              <p className="text-primary/80 text-xs tracking-[0.15em]">{levelProgressText}</p>
+            </div>
             <p className="text-primary/75 mt-1 text-sm">{currentLevel.description}</p>
             {isDev ? (
               <div className="mt-3 flex items-center gap-2">
