@@ -24,7 +24,7 @@ function MessageMarkdown({ text }: { text: string }) {
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
-        p: ({ children }) => <p className="whitespace-pre-wrap break-words">{children}</p>,
+        p: ({ children }) => <p className="whitespace-pre-wrap wrap-break-word">{children}</p>,
         a: ({ children, href }) => (
           <a
             href={href}
@@ -91,11 +91,11 @@ export default function Home() {
   };
 
   return (
-    <main className="relative flex h-screen flex-col bg-background">
+    <main className="relative flex h-screen flex-col bg-background font-mono">
       <ScrollArea className="min-h-0 flex-1">
         <div className="mx-auto w-full max-w-3xl space-y-4 p-4 sm:p-6 pb-24!">
           {messages.length === 0 ? (
-            <p className="text-muted-foreground py-20 text-center text-sm">
+            <p className="text-muted-foreground py-20 text-center text-sm tracking-wide">
               No messages yet. Ask me anything to get started.
             </p>
           ) : (
@@ -106,14 +106,14 @@ export default function Home() {
               return (
                 <div
                   key={message.id}
-                  className="w-full"
+                  className="w-full border-l-2 border-primary/30 py-1 pl-3"
                 >
                   <div className="space-y-1">
-                    <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                    <p className="text-primary/80 text-xs tracking-[0.2em] uppercase">
                       {label}
                     </p>
                     {text ? (
-                      <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:scroll-m-20 prose-headings:tracking-tight prose-h1:text-3xl prose-h1:font-extrabold prose-h2:border-b prose-h2:pb-2 prose-h2:text-2xl prose-h2:font-semibold prose-h3:text-xl prose-h3:font-semibold prose-p:leading-7 prose-a:underline prose-a:underline-offset-2 prose-code:before:content-none prose-code:after:content-none prose-code:bg-foreground/10 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-background/70 prose-pre:overflow-x-auto">
+                      <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:scroll-m-20 prose-headings:tracking-tight prose-h1:text-3xl prose-h1:font-extrabold prose-h2:border-b prose-h2:pb-2 prose-h2:text-2xl prose-h2:font-semibold prose-h3:text-xl prose-h3:font-semibold prose-p:leading-7 prose-a:text-primary prose-a:underline prose-a:underline-offset-2 prose-code:before:content-none prose-code:after:content-none prose-code:bg-primary/10 prose-code:px-1 prose-code:py-0.5 prose-code:rounded-none prose-pre:border prose-pre:border-primary/30 prose-pre:bg-background/70 prose-pre:overflow-x-auto">
                         <MessageMarkdown text={text} />
                       </div>
                     ) : (
@@ -132,35 +132,37 @@ export default function Home() {
         </div>
       </ScrollArea>
 
-      <div className="fixed inset-x-0 bottom-0 bg-linear-to-t from-background/95 via-background/90 to-transparent">
+      <div className="fixed inset-x-0 bottom-0 border-t border-primary/20 bg-linear-to-t from-background/95 via-background/90 to-transparent">
         <div className="mx-auto w-full max-w-3xl p-4 sm:p-6">
           {error ? (
             <p className="text-destructive mb-2 text-sm">{error.message}</p>
           ) : null}
 
           <form className="flex items-center gap-2" onSubmit={handleSubmit}>
-            <InputGroup>
-              <Input
-                ref={inputRef}
-                value={input}
-                onChange={(event) => setInput(event.target.value)}
-                onKeyDown={handleInputKeyDown}
-                placeholder="Type a message..."
-                className="h-10 pr-24"
-              />
-              <InputGroupButton>
-                <Button
-                  type="submit"
-                  size="sm"
-                  disabled={isLoading || input.trim().length === 0}
-                  className="pointer-events-auto"
-                  aria-label="Send message"
-                  title="Send"
-                >
-                  <Send className="size-4" />
-                </Button>
-              </InputGroupButton>
-            </InputGroup>
+            <div className="relative w-full">
+              <InputGroup>
+                <Input
+                  ref={inputRef}
+                  value={input}
+                  onChange={(event) => setInput(event.target.value)}
+                  onKeyDown={handleInputKeyDown}
+                  placeholder="Type a message..."
+                  className="h-10 rounded-none border-primary/30 pr-24 focus-visible:ring-primary/40"
+                />
+                <InputGroupButton>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={isLoading || input.trim().length === 0}
+                    className="pointer-events-auto rounded-none border border-primary/35 bg-primary/10 text-primary hover:bg-primary/20"
+                    aria-label="Send message"
+                    title="Send"
+                  >
+                    <Send className="size-4" />
+                  </Button>
+                </InputGroupButton>
+              </InputGroup>
+            </div>
           </form>
         </div>
       </div>
