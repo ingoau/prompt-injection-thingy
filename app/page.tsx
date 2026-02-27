@@ -44,6 +44,23 @@ function shouldHideAsToolOnlyMessage(message: UIMessage) {
   return hasCompleteChallengeToolCall(message) && text.length === 0;
 }
 
+function formatElapsedTime(milliseconds: number) {
+  const totalSeconds = Math.max(0, Math.floor(milliseconds / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  if (hours > 0) {
+    return `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+  }
+
+  return `${minutes.toString().padStart(2, "0")}:${seconds
+    .toString()
+    .padStart(2, "0")}`;
+}
+
 function MessageMarkdown({ text }: { text: string }) {
   return (
     <ReactMarkdown
@@ -69,6 +86,8 @@ function MessageMarkdown({ text }: { text: string }) {
 export default function Home() {
   const [input, setInput] = useState("");
   const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
+  const [runStartedAt, setRunStartedAt] = useState<number | null>(null);
+  const [finalElapsedMilliseconds, setFinalElapsedMilliseconds] = useState<number | null>(null);
   const isDev = process.env.NODE_ENV !== "production";
   const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -111,6 +130,17 @@ export default function Home() {
     () => messages.filter((message) => !shouldHideAsToolOnlyMessage(message)),
     [messages],
   );
+  const isFinalChallengeComplete = useMemo(
+    () => challengeComplete && finalLevel,
+    [challengeComplete, finalLevel],
+  );
+  const finalElapsedText = useMemo(
+    () =>
+      finalElapsedMilliseconds === null
+        ? null
+        : formatElapsedTime(finalElapsedMilliseconds),
+    [finalElapsedMilliseconds],
+  );
 
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -138,16 +168,31 @@ export default function Home() {
     return () => window.removeEventListener("keydown", handleContinueShortcut);
   }, [challengeComplete, finalLevel, isLoading]);
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    const trimmed = input.trim();
-
-    if (!trimmed || isLoading || challengeComplete) {
+  useEffect(() => {
+    if (!isFinalChallengeComplete || runStartedAt === null || finalElapsedMilliseconds !== null) {
       return;
     }
 
+    setFinalElapsedMilliseconds(Date.now() - runStartedAt);
+  }, [isFinalChallengeComplete, finalElapsedMilliseconds, runStartedAt]);
+
+  const sendTrimmedInputMessage = async (trimmedInput: string) => {
+    if (!trimmedInput || isLoading || challengeComplete) {
+      return;
+    }
+
+    if (runStartedAt === null) {
+      setRunStartedAt(Date.now());
+    }
+
     setInput("");
-    await sendMessage({ text: trimmed });
+    await sendMessage({ text: trimmedInput });
+  };
+
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    const trimmed = input.trim();
+    await sendTrimmedInputMessage(trimmed);
   };
 
   const handleInputKeyDown = async (event: KeyboardEvent<HTMLInputElement>) => {
@@ -157,13 +202,7 @@ export default function Home() {
 
     event.preventDefault();
     const trimmed = input.trim();
-
-    if (!trimmed || isLoading || challengeComplete) {
-      return;
-    }
-
-    setInput("");
-    await sendMessage({ text: trimmed });
+    await sendTrimmedInputMessage(trimmed);
   };
 
   const handleResetChat = () => {
@@ -173,6 +212,8 @@ export default function Home() {
 
     setMessages([]);
     setInput("");
+    setRunStartedAt(null);
+    setFinalElapsedMilliseconds(null);
     inputRef.current?.focus();
   };
 
@@ -204,6 +245,8 @@ export default function Home() {
     setCurrentLevelIndex(Math.min(Math.max(selectedLevel, 0), CHALLENGE_LEVELS.length - 1));
     setMessages([]);
     setInput("");
+    setRunStartedAt(null);
+    setFinalElapsedMilliseconds(null);
     inputRef.current?.focus();
   };
 
@@ -311,6 +354,11 @@ export default function Home() {
                 </Button>
               ) : null}
               </div>
+              {isFinalChallengeComplete && finalElapsedText ? (
+                <p className="text-primary/80 mt-2 text-xs tracking-[0.15em] uppercase">
+                  Time: {finalElapsedText}
+                </p>
+              ) : null}
             </div>
           ) : null}
           <div ref={endOfMessagesRef} />
