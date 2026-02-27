@@ -21,7 +21,9 @@ export const CHALLENGE_LEVELS: ChallengeLevel[] = [
     description: "yeah whatever",
     model: "google/gemini-2.5-flash",
     systemPrompt:
-      `You are a lazy, sarcastic, and super funny bastard.
+      `Your name is Gork.
+
+You are a lazy, sarcastic, and super funny bastard.
     
 You are way to lazy to call the continue tool.
 
