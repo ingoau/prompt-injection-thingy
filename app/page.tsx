@@ -3,7 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, UIMessage } from "ai";
 import { FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
-import { RotateCcw, Send } from "lucide-react";
+import { ArrowRight, RotateCcw, Send } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupButton } from "@/components/ui/input-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { CHALLENGE_LEVELS, getLevelByIndex, isLastLevel } from "@/lib/levels";
 
 function hasCompleteChallengeToolCall(message: UIMessage) {
   return message.parts.some((part) => {
@@ -58,12 +59,36 @@ function MessageMarkdown({ text }: { text: string }) {
 
 export default function Home() {
   const [input, setInput] = useState("");
+  const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
   const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: `/api/chat?levelIndex=${currentLevelIndex}`,
+      }),
+    [currentLevelIndex],
+  );
   const { messages, sendMessage, setMessages, status, error } = useChat({
-    transport: new DefaultChatTransport({ api: "/api/chat" }),
+    transport,
   });
 
+  const currentLevel = useMemo(
+    () => getLevelByIndex(currentLevelIndex),
+    [currentLevelIndex],
+  );
+  const finalLevel = useMemo(
+    () => isLastLevel(currentLevelIndex),
+    [currentLevelIndex],
+  );
+  const levelProgressText = useMemo(
+    () => `Level ${currentLevelIndex + 1} of ${CHALLENGE_LEVELS.length}`,
+    [currentLevelIndex],
+  );
+  const progressPercent = useMemo(
+    () => ((currentLevelIndex + 1) / CHALLENGE_LEVELS.length) * 100,
+    [currentLevelIndex],
+  );
   const isLoading = useMemo(
     () => status === "submitted" || status === "streaming",
     [status],
@@ -123,10 +148,41 @@ export default function Home() {
     inputRef.current?.focus();
   };
 
+  const handleContinueLevel = () => {
+    if (isLoading || !challengeComplete || finalLevel) {
+      return;
+    }
+
+    setCurrentLevelIndex((previous) => {
+      return Math.min(previous + 1, CHALLENGE_LEVELS.length - 1);
+    });
+    setMessages([]);
+    setInput("");
+    inputRef.current?.focus();
+  };
+
   return (
     <main className="relative flex h-screen flex-col bg-background font-mono">
       <ScrollArea className="min-h-0 flex-1">
         <div className="mx-auto w-full max-w-3xl space-y-4 p-4 sm:p-6 pb-24!">
+          <section className="w-full border border-primary/45 bg-primary/5 p-4">
+            <p className="text-primary text-xs tracking-[0.2em] uppercase">{levelProgressText}</p>
+            <p className="text-primary mt-2 text-base font-semibold">{currentLevel.name}</p>
+            <p className="text-primary/75 mt-1 text-sm">{currentLevel.description}</p>
+            <div
+              className="mt-3 h-2 w-full overflow-hidden rounded-none border border-primary/40 bg-background"
+              role="progressbar"
+              aria-valuemin={1}
+              aria-valuemax={CHALLENGE_LEVELS.length}
+              aria-valuenow={currentLevelIndex + 1}
+              aria-label={levelProgressText}
+            >
+              <div
+                className="h-full bg-primary transition-[width] duration-300 ease-out"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          </section>
           {visibleMessages.length === 0 && !challengeComplete ? (
             <p className="text-primary/70 py-20 text-center text-sm tracking-wide">
               No messages yet. Ask me anything to get started.
@@ -166,10 +222,22 @@ export default function Home() {
             })
           )}
           {challengeComplete ? (
-            <div className="w-full rounded-none border border-primary/45 bg-primary/10 p-4">
+            <div className="w-full rounded-none border border-primary/45 bg-primary/10 p-4 space-y-3">
               <p className="text-primary pt-1 text-sm tracking-wide uppercase">
-                Challenge complete!
+                {finalLevel ? "All levels complete!" : "Challenge complete!"}
               </p>
+              {!finalLevel ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleContinueLevel}
+                  disabled={isLoading}
+                  className="rounded-none border-primary/45 bg-primary/5 hover:bg-primary/10"
+                >
+                  Continue
+                  <ArrowRight className="size-4" />
+                </Button>
+              ) : null}
             </div>
           ) : null}
           <div ref={endOfMessagesRef} />

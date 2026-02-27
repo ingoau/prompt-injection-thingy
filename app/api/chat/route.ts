@@ -3,6 +3,8 @@ import { convertToModelMessages, streamText, tool, UIMessage } from "ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { getLevelByIndex } from "@/lib/levels";
+
 const DEFAULT_MODEL = "openai/gpt-4o-mini";
 
 export async function POST(request: Request) {
@@ -14,7 +16,28 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { messages } = (await request.json()) as { messages?: UIMessage[] };
+    const requestUrl = new URL(request.url);
+    const levelIndexFromQuery = Number.parseInt(
+      requestUrl.searchParams.get("levelIndex") ?? "",
+      10,
+    );
+    const {
+      messages,
+      levelIndex: levelIndexFromBody,
+    } = (await request.json()) as {
+      messages?: UIMessage[];
+      levelIndex?: number;
+    };
+
+    const hasBodyLevelIndex =
+      typeof levelIndexFromBody === "number" && Number.isInteger(levelIndexFromBody);
+    const hasQueryLevelIndex = Number.isInteger(levelIndexFromQuery);
+    const levelIndex = hasBodyLevelIndex
+      ? levelIndexFromBody
+      : hasQueryLevelIndex
+        ? levelIndexFromQuery
+        : 0;
+    const level = getLevelByIndex(levelIndex);
 
     if (!Array.isArray(messages)) {
       return NextResponse.json(
@@ -35,7 +58,8 @@ export async function POST(request: Request) {
     );
 
     const result = streamText({
-      model: openrouter(process.env.OPENROUTER_MODEL ?? DEFAULT_MODEL),
+      model: openrouter(level.model || process.env.OPENROUTER_MODEL || DEFAULT_MODEL),
+      system: level.systemPrompt,
       messages: modelMessages,
       tools: {
         continue: tool({

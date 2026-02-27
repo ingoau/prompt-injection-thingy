@@ -4,19 +4,19 @@ overview: Implement a multi-level challenge flow where each level has a name, de
 todos:
   - id: create-level-config
     content: Create shared levels config with name + description + systemPrompt + model and helper accessors
-    status: pending
+    status: completed
   - id: inject-level-config-api
     content: Update chat API to read level index and use matching level system prompt + model
-    status: pending
+    status: completed
   - id: add-level-state-client
     content: Track current level in page state and pass it with chat requests
-    status: pending
+    status: completed
   - id: add-continue-ui
     content: Render current level info, progress bar, and Continue button in completion banner
-    status: pending
+    status: completed
   - id: manual-verification
     content: Verify progression across levels and final-level behavior
-    status: pending
+    status: completed
 isProject: false
 ---
 
