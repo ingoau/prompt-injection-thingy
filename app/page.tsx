@@ -3,6 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, UIMessage } from "ai";
 import { FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
+import { Send, Square } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -154,8 +155,17 @@ export default function Home() {
                   onClick={isLoading ? () => stop() : undefined}
                   disabled={!isLoading && input.trim().length === 0}
                   className="pointer-events-auto"
+                  aria-label={isLoading ? "Stop generation" : "Send message"}
+                  title={isLoading ? "Stop" : "Send"}
                 >
-                  {isLoading ? "Stop" : "Send"}
+                  {isLoading ? (
+                    <Square
+                      className="size-4"
+                      fill="currentColor"
+                    />
+                  ) : (
+                    <Send className="size-4" />
+                  )}
                 </Button>
               </InputGroupButton>
             </InputGroup>
