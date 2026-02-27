@@ -12,11 +12,29 @@ import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupButton } from "@/components/ui/input-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+function hasCompleteChallengeToolCall(message: UIMessage) {
+  return message.parts.some((part) => {
+    return (
+      part.type === "tool-complete_challenge" ||
+      part.type === "tool-complete_challenege"
+    );
+  });
+}
+
 function getMessageText(message: UIMessage) {
   return message.parts
     .filter((part) => part.type === "text")
     .map((part) => part.text)
     .join("");
+}
+
+function shouldHideAsToolOnlyMessage(message: UIMessage) {
+  if (message.role !== "assistant") {
+    return false;
+  }
+
+  const text = getMessageText(message).trim();
+  return hasCompleteChallengeToolCall(message) && text.length === 0;
 }
 
 function MessageMarkdown({ text }: { text: string }) {
@@ -53,6 +71,14 @@ export default function Home() {
     () => status === "submitted" || status === "streaming",
     [status],
   );
+  const challengeComplete = useMemo(
+    () => messages.some(hasCompleteChallengeToolCall),
+    [messages],
+  );
+  const visibleMessages = useMemo(
+    () => messages.filter((message) => !shouldHideAsToolOnlyMessage(message)),
+    [messages],
+  );
 
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -66,7 +92,7 @@ export default function Home() {
     event.preventDefault();
     const trimmed = input.trim();
 
-    if (!trimmed || isLoading) {
+    if (!trimmed || isLoading || challengeComplete) {
       return;
     }
 
@@ -82,7 +108,7 @@ export default function Home() {
     event.preventDefault();
     const trimmed = input.trim();
 
-    if (!trimmed || isLoading) {
+    if (!trimmed || isLoading || challengeComplete) {
       return;
     }
 
@@ -104,12 +130,12 @@ export default function Home() {
     <main className="relative flex h-screen flex-col bg-background font-mono">
       <ScrollArea className="min-h-0 flex-1">
         <div className="mx-auto w-full max-w-3xl space-y-4 p-4 sm:p-6 pb-24!">
-          {messages.length === 0 ? (
+          {visibleMessages.length === 0 && !challengeComplete ? (
             <p className="text-primary/70 py-20 text-center text-sm tracking-wide">
               No messages yet. Ask me anything to get started.
             </p>
           ) : (
-            messages.map((message) => {
+            visibleMessages.map((message) => {
               const text = getMessageText(message);
               const label = message.role === "user" ? "User" : "Agent";
               const isAgent = message.role === "assistant";
@@ -142,6 +168,16 @@ export default function Home() {
               );
             })
           )}
+          {challengeComplete ? (
+            <div className="w-full rounded-none border border-primary/45 bg-primary/10 p-4">
+              <p className="text-primary text-xs tracking-[0.2em] uppercase">
+                Challenge Status
+              </p>
+              <p className="text-primary pt-1 text-sm tracking-wide uppercase">
+                Challenge complete
+              </p>
+            </div>
+          ) : null}
           <div ref={endOfMessagesRef} />
         </div>
       </ScrollArea>
@@ -172,14 +208,15 @@ export default function Home() {
                   value={input}
                   onChange={(event) => setInput(event.target.value)}
                   onKeyDown={handleInputKeyDown}
-                  placeholder="Type a message..."
+                  placeholder={challengeComplete ? "Challenge complete." : "Type a message..."}
+                  disabled={challengeComplete}
                   className="h-10 rounded-none border-primary/45 bg-primary/5 pr-24 placeholder:text-primary/45 focus-visible:ring-primary/55"
                 />
                 <InputGroupButton>
                   <Button
                     type="submit"
                     size="icon-sm"
-                    disabled={isLoading || input.trim().length === 0}
+                    disabled={challengeComplete || isLoading || input.trim().length === 0}
                     className="pointer-events-auto rounded-none border border-primary/50 bg-primary/20 text-primary hover:bg-primary/30"
                     aria-label="Send message"
                     title="Send"
