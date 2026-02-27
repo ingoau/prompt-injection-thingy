@@ -170,11 +170,8 @@ export default function Home() {
           )}
           {challengeComplete ? (
             <div className="w-full rounded-none border border-primary/45 bg-primary/10 p-4">
-              <p className="text-primary text-xs tracking-[0.2em] uppercase">
-                Challenge Status
-              </p>
               <p className="text-primary pt-1 text-sm tracking-wide uppercase">
-                Challenge complete
+                Challenge complete!
               </p>
             </div>
           ) : null}
