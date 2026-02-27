@@ -2,7 +2,15 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, UIMessage } from "ai";
-import { FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ChangeEvent,
+  FormEvent,
+  KeyboardEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { ArrowRight, RotateCcw, Send } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -60,6 +68,7 @@ function MessageMarkdown({ text }: { text: string }) {
 export default function Home() {
   const [input, setInput] = useState("");
   const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
+  const isDev = process.env.NODE_ENV !== "production";
   const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const transport = useMemo(
@@ -161,6 +170,22 @@ export default function Home() {
     inputRef.current?.focus();
   };
 
+  const handleLevelSelect = (event: ChangeEvent<HTMLSelectElement>) => {
+    if (isLoading) {
+      return;
+    }
+
+    const selectedLevel = Number.parseInt(event.target.value, 10);
+    if (!Number.isInteger(selectedLevel)) {
+      return;
+    }
+
+    setCurrentLevelIndex(Math.min(Math.max(selectedLevel, 0), CHALLENGE_LEVELS.length - 1));
+    setMessages([]);
+    setInput("");
+    inputRef.current?.focus();
+  };
+
   return (
     <main className="relative flex h-screen flex-col bg-background font-mono">
       <ScrollArea className="min-h-0 flex-1">
@@ -169,6 +194,29 @@ export default function Home() {
             <p className="text-primary text-xs tracking-[0.2em] uppercase">{levelProgressText}</p>
             <p className="text-primary mt-2 text-base font-semibold">{currentLevel.name}</p>
             <p className="text-primary/75 mt-1 text-sm">{currentLevel.description}</p>
+            {isDev ? (
+              <div className="mt-3 flex items-center gap-2">
+                <label
+                  htmlFor="level-picker"
+                  className="text-primary/70 text-xs tracking-[0.15em] uppercase"
+                >
+                  Dev level picker
+                </label>
+                <select
+                  id="level-picker"
+                  value={currentLevelIndex}
+                  onChange={handleLevelSelect}
+                  disabled={isLoading}
+                  className="h-8 border border-primary/45 bg-background px-2 text-sm"
+                >
+                  {CHALLENGE_LEVELS.map((level, index) => (
+                    <option key={level.id} value={index}>
+                      {index + 1}. {level.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
             <div
               className="mt-3 h-2 w-full overflow-hidden rounded-none border border-primary/40 bg-background"
               role="progressbar"
