@@ -108,8 +108,8 @@ export default function Home() {
                 <div
                   key={message.id}
                   className={`w-full border-l-2 py-1 pl-3 ${isAgent
-                      ? "border-primary/70 bg-transparent"
-                      : "border-primary/45 bg-primary/5"
+                    ? "border-primary/70 bg-transparent"
+                    : "border-primary/45 bg-primary/5"
                     }`}
                 >
                   <div className="space-y-1">
@@ -136,7 +136,7 @@ export default function Home() {
         </div>
       </ScrollArea>
 
-      <div className="fixed inset-x-0 bottom-0 border-t border-primary/35 bg-linear-to-t from-background/95 via-background/90 to-primary/5">
+      <div className="fixed inset-x-0 bottom-0 border-t border-primary/35 bg-background">
         <div className="mx-auto w-full max-w-3xl p-4 sm:p-6">
           {error ? (
             <p className="text-destructive mb-2 text-sm">{error.message}</p>
