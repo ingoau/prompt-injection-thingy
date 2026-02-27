@@ -156,7 +156,7 @@ export default function Home() {
                 <InputGroupButton>
                   <Button
                     type="submit"
-                    size="sm"
+                    size="icon-sm"
                     disabled={isLoading || input.trim().length === 0}
                     className="pointer-events-auto rounded-none border border-primary/50 bg-primary/20 text-primary hover:bg-primary/30"
                     aria-label="Send message"
