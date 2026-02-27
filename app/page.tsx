@@ -232,6 +232,21 @@ export default function Home() {
     });
   };
 
+  const handleRestartGame = () => {
+    if (isLoading) {
+      return;
+    }
+
+    setCurrentLevelIndex(0);
+    setMessages([]);
+    setInput("");
+    setRunStartedAt(null);
+    setFinalElapsedMilliseconds(null);
+    window.requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
+  };
+
   const handleLevelSelect = (event: ChangeEvent<HTMLSelectElement>) => {
     if (isLoading) {
       return;
@@ -352,7 +367,17 @@ export default function Home() {
                   Continue
                   <Kbd>⏎</Kbd>
                 </Button>
-              ) : null}
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleRestartGame}
+                  disabled={isLoading}
+                  className="rounded-none border-primary/45 bg-primary/5 hover:bg-primary/10"
+                >
+                  Restart Game
+                </Button>
+              )}
               </div>
               {isFinalChallengeComplete && finalElapsedText ? (
                 <p className="text-primary/80 mt-2 text-xs tracking-[0.15em] uppercase">
