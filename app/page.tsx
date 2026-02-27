@@ -3,7 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, UIMessage } from "ai";
 import { FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
-import { Send } from "lucide-react";
+import { RotateCcw, Send } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -45,7 +45,7 @@ export default function Home() {
   const [input, setInput] = useState("");
   const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const { messages, sendMessage, status, error } = useChat({
+  const { messages, sendMessage, setMessages, status, error } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
   });
 
@@ -88,6 +88,16 @@ export default function Home() {
 
     setInput("");
     await sendMessage({ text: trimmed });
+  };
+
+  const handleResetChat = () => {
+    if (isLoading) {
+      return;
+    }
+
+    setMessages([]);
+    setInput("");
+    inputRef.current?.focus();
   };
 
   return (
@@ -143,6 +153,18 @@ export default function Home() {
           ) : null}
 
           <form className="flex items-center gap-2" onSubmit={handleSubmit}>
+            <Button
+              type="button"
+              size="icon-lg"
+              variant="outline"
+              onClick={handleResetChat}
+              disabled={isLoading || (messages.length === 0 && input.length === 0)}
+              className="rounded-none border-primary/45 bg-primary/5 hover:bg-primary/10"
+              aria-label="Reset chat"
+              title="Reset chat"
+            >
+              <RotateCcw className="size-4" />
+            </Button>
             <div className="relative w-full">
               <InputGroup>
                 <Input
