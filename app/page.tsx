@@ -92,8 +92,8 @@ export default function Home() {
 
   return (
     <main className="relative flex h-screen flex-col bg-background">
-      <ScrollArea className="min-h-0 flex-1 pb-36">
-        <div className="mx-auto w-full max-w-3xl space-y-4 p-4 sm:p-6">
+      <ScrollArea className="min-h-0 flex-1">
+        <div className="mx-auto w-full max-w-3xl space-y-4 p-4 sm:p-6 pb-24!">
           {messages.length === 0 ? (
             <p className="text-muted-foreground py-20 text-center text-sm">
               No messages yet. Ask me anything to get started.
@@ -132,7 +132,7 @@ export default function Home() {
         </div>
       </ScrollArea>
 
-      <div className="bg-background/95 fixed inset-x-0 bottom-0 border-t backdrop-blur">
+      <div className="fixed inset-x-0 bottom-0 bg-linear-to-t from-background/95 via-background/90 to-transparent">
         <div className="mx-auto w-full max-w-3xl p-4 sm:p-6">
           {error ? (
             <p className="text-destructive mb-2 text-sm">{error.message}</p>
