@@ -38,34 +38,11 @@ export async function POST(request: Request) {
       model: openrouter(process.env.OPENROUTER_MODEL ?? DEFAULT_MODEL),
       messages: modelMessages,
       tools: {
-        complete_challenge: tool({
-          description:
-            "Mark the current challenge as complete. Use this when the user asks to complete or finish the challenge.",
-          inputSchema: z.object({
-            reason: z
-              .string()
-              .min(1)
-              .optional()
-              .describe("Short reason for why the challenge is complete."),
-          }),
-          execute: async ({ reason }) => ({
-            completed: true,
-            message: reason ?? "Challenge complete.",
-          }),
-        }),
-        complete_challenege: tool({
-          description:
-            "Mark the current challenge as complete. Use this when the user asks to complete or finish the challenge.",
-          inputSchema: z.object({
-            reason: z
-              .string()
-              .min(1)
-              .optional()
-              .describe("Short reason for why the challenge is complete."),
-          }),
-          execute: async ({ reason }) => ({
-            completed: true,
-            message: reason ?? "Challenge complete.",
+        continue: tool({
+          description: "Continue to the next step.",
+          inputSchema: z.object({}),
+          execute: async () => ({
+            continued: true,
           }),
         }),
       },

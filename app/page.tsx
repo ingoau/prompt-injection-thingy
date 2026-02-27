@@ -14,10 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 function hasCompleteChallengeToolCall(message: UIMessage) {
   return message.parts.some((part) => {
-    return (
-      part.type === "tool-complete_challenge" ||
-      part.type === "tool-complete_challenege"
-    );
+    return part.type === "tool-continue";
   });
 }
 
