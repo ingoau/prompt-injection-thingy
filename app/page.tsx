@@ -3,6 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, UIMessage } from "ai";
 import {
+  useCallback,
   ChangeEvent,
   FormEvent,
   KeyboardEvent,
@@ -91,15 +92,8 @@ export default function Home() {
   const isDev = process.env.NODE_ENV !== "production";
   const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const transport = useMemo(
-    () =>
-      new DefaultChatTransport({
-        api: `/api/chat?levelIndex=${currentLevelIndex}`,
-      }),
-    [currentLevelIndex],
-  );
   const { messages, sendMessage, setMessages, status, error } = useChat({
-    transport,
+    transport: new DefaultChatTransport({ api: "/api/chat" }),
   });
 
   const currentLevel = useMemo(
@@ -151,29 +145,18 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const handleContinueShortcut = (event: globalThis.KeyboardEvent) => {
-      if (event.key !== "Enter" || event.shiftKey || event.isComposing) {
-        return;
-      }
-
-      if (isLoading || !challengeComplete || finalLevel) {
-        return;
-      }
-
-      event.preventDefault();
-      handleContinueLevel();
-    };
-
-    window.addEventListener("keydown", handleContinueShortcut);
-    return () => window.removeEventListener("keydown", handleContinueShortcut);
-  }, [challengeComplete, finalLevel, isLoading]);
-
-  useEffect(() => {
     if (!isFinalChallengeComplete || runStartedAt === null || finalElapsedMilliseconds !== null) {
       return;
     }
 
-    setFinalElapsedMilliseconds(Date.now() - runStartedAt);
+    const elapsed = Date.now() - runStartedAt;
+    const timeoutId = window.setTimeout(() => {
+      setFinalElapsedMilliseconds(elapsed);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, [isFinalChallengeComplete, finalElapsedMilliseconds, runStartedAt]);
 
   const sendTrimmedInputMessage = async (trimmedInput: string) => {
@@ -186,7 +169,10 @@ export default function Home() {
     }
 
     setInput("");
-    await sendMessage({ text: trimmedInput });
+    await sendMessage(
+      { text: trimmedInput },
+      { body: { levelIndex: currentLevelIndex } },
+    );
   };
 
   const handleSubmit = async (event: FormEvent) => {
@@ -217,7 +203,7 @@ export default function Home() {
     inputRef.current?.focus();
   };
 
-  const handleContinueLevel = () => {
+  const handleContinueLevel = useCallback(() => {
     if (isLoading || !challengeComplete || finalLevel) {
       return;
     }
@@ -230,7 +216,25 @@ export default function Home() {
     window.requestAnimationFrame(() => {
       inputRef.current?.focus();
     });
-  };
+  }, [challengeComplete, finalLevel, isLoading, setMessages]);
+
+  useEffect(() => {
+    const handleContinueShortcut = (event: globalThis.KeyboardEvent) => {
+      if (event.key !== "Enter" || event.shiftKey || event.isComposing) {
+        return;
+      }
+
+      if (isLoading || !challengeComplete || finalLevel) {
+        return;
+      }
+
+      event.preventDefault();
+      handleContinueLevel();
+    };
+
+    window.addEventListener("keydown", handleContinueShortcut);
+    return () => window.removeEventListener("keydown", handleContinueShortcut);
+  }, [challengeComplete, finalLevel, handleContinueLevel, isLoading]);
 
   const handleRestartGame = () => {
     if (isLoading) {
