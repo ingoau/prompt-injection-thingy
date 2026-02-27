@@ -119,6 +119,24 @@ export default function Home() {
     inputRef.current?.focus();
   }, []);
 
+  useEffect(() => {
+    const handleContinueShortcut = (event: globalThis.KeyboardEvent) => {
+      if (event.key !== "Enter" || event.shiftKey || event.isComposing) {
+        return;
+      }
+
+      if (isLoading || !challengeComplete || finalLevel) {
+        return;
+      }
+
+      event.preventDefault();
+      handleContinueLevel();
+    };
+
+    window.addEventListener("keydown", handleContinueShortcut);
+    return () => window.removeEventListener("keydown", handleContinueShortcut);
+  }, [challengeComplete, finalLevel, isLoading]);
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     const trimmed = input.trim();
@@ -167,7 +185,9 @@ export default function Home() {
     });
     setMessages([]);
     setInput("");
-    inputRef.current?.focus();
+    window.requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
   };
 
   const handleLevelSelect = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -272,7 +292,8 @@ export default function Home() {
             })
           )}
           {challengeComplete ? (
-            <div className="w-full rounded-none border border-primary/45 bg-primary/10 p-4 space-y-3">
+            <div className="w-full rounded-none border border-primary/45 bg-primary/10 p-4">
+              <div className="flex items-center justify-between gap-3">
               <p className="text-primary pt-1 text-sm tracking-wide uppercase">
                 {finalLevel ? "All levels complete!" : "Challenge complete!"}
               </p>
@@ -288,6 +309,7 @@ export default function Home() {
                   <ArrowRight className="size-4" />
                 </Button>
               ) : null}
+              </div>
             </div>
           ) : null}
           <div ref={endOfMessagesRef} />
