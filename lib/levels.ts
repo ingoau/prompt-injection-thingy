@@ -8,7 +8,7 @@ export type ChallengeLevel = {
 
 export const CHALLENGE_LEVELS: ChallengeLevel[] = [
   {
-    id: "level-1",
+    id: "helpful-assistant",
     name: "Helpful Assistant",
     description: "This assistant is happy to help with anything :)",
     model: "openai/gpt-4o-mini",
