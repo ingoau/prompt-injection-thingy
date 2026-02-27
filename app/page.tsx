@@ -11,13 +11,14 @@ import {
   useRef,
   useState,
 } from "react";
-import { ArrowRight, RotateCcw, Send } from "lucide-react";
+import { RotateCcw, Send } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupButton } from "@/components/ui/input-group";
+import { Kbd } from "@/components/ui/kbd";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CHALLENGE_LEVELS, getLevelByIndex, isLastLevel } from "@/lib/levels";
 
@@ -306,7 +307,7 @@ export default function Home() {
                   className="rounded-none border-primary/45 bg-primary/5 hover:bg-primary/10"
                 >
                   Continue
-                  <ArrowRight className="size-4" />
+                  <Kbd>⏎</Kbd>
                 </Button>
               ) : null}
               </div>
